@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Madero H2O: Guardián del Agua — Cultura Hídrica Ciudadana</title>
+  <meta name="description" content="Super-App de cultura hídrica para Ciudad Madero, Tamaulipas. Detecta fugas, lirio acuático y analiza la calidad del agua con inteligencia artificial." />
+  <meta property="og:title" content="Madero H2O: Guardián del Agua" />
+  <meta property="og:description" content="Monitoreo hídrico ciudadano con IA para Ciudad Madero, Tamaulipas." />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ─── Background ─────────────────────────────────────────── -->
+<div class="bg-canvas"></div>
+
+<!-- ─── Header ─────────────────────────────────────────────── -->
+<header class="header">
+  <svg class="header-waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path class="header-wave-path" d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="#00b4d8"/>
+  </svg>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">💧</div>
+      <div class="logo-text">
+        <div class="logo-title">Madero H2O</div>
+        <div class="logo-subtitle">Guardián del Agua · Ciudad Madero</div>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="/" class="nav-btn active">🏠 Inicio</a>
+      <a href="/dashboard" class="nav-btn">📊 Dashboard</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ─── Main Content ────────────────────────────────────────── -->
+<main>
+  <div class="container">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">
+        <span>🌊</span>
+        Ciudad Madero, Tamaulipas · Sistema Lagunario-Chairel
+      </div>
+      <h1>Monitoreo Hídrico<br/>con Inteligencia Artificial</h1>
+      <p class="hero-desc">
+        Reporta fugas, detecta la proliferación de lirio acuático y analiza la calidad 
+        del agua de tu comunidad usando la cámara de tu dispositivo.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value">40-60%</div>
+          <div class="stat-label">Agua perdida por fugas en Latam</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Módulos de análisis IA</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">COMAPA</div>
+          <div class="stat-label">Reportes directos</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module Cards -->
+    <p class="section-title">Elige qué problema estás reportando</p>
+
+    <div class="modules-grid">
+
+      <!-- Módulo 1: Fugas -->
+      <div class="module-card" data-modulo="fuga" id="card-fuga" tabindex="0" role="button" aria-label="Módulo Monitor de Fugas">
+        <div class="card-glow"></div>
+        <div class="card-icon">💧</div>
+        <div class="card-tag">Módulo 1</div>
+        <div class="card-title">Monitor Ciudadano de Fugas</div>
+        <p class="card-desc">
+          Toma una foto de una mancha de humedad o un brote de agua en la calle. 
+          La IA detecta si es una fuga real y clasifica su gravedad para reportarla a COMAPA Sur.
+        </p>
+        <div class="card-cta">
+          Reportar fuga
+          <span class="card-cta-arrow">→</span>
+        </div>
+      </div>
+
+      <!-- Módulo 2: Lirio -->
+      <div class="module-card" data-modulo="lirio" id="card-lirio" tabindex="0" role="button" aria-label="Módulo Alerta de Lirio Acuático">
+        <div class="card-glow"></div>
+        <div class="card-icon">🌿</div>
+        <div class="card-tag">Módulo 2</div>
+        <div class="card-title">Alerta de Invasión de Lirio Acuático</div>
+        <p class="card-desc">
+          Sube una foto de la superficie del agua en la Laguna del Chairel o canales cercanos. 
+          La IA estima el porcentaje de cobertura y alerta a las brigadas de limpieza.
+        </p>
+        <div class="card-cta">
+          Reportar lirio
+          <span class="card-cta-arrow">→</span>
+        </div>
+      </div>
+
+      <!-- Módulo 3: Calidad -->
+      <div class="module-card" data-modulo="calidad" id="card-calidad" tabindex="0" role="button" aria-label="Módulo Calidad del Agua">
+        <div class="card-glow"></div>
+        <div class="card-icon">🔬</div>
+        <div class="card-tag">Módulo 3</div>
+        <div class="card-title">Asistente de Calidad y Turbidez</div>
+        <p class="card-desc">
+          Toma una foto de un vaso de agua contra un fondo blanco. 
+          La IA analiza el color y la turbidez para indicar si el agua es apta para consumo, 
+          uso doméstico o riego.
+        </p>
+        <div class="card-cta">
+          Analizar calidad
+          <span class="card-cta-arrow">→</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Upload Section -->
+    <section class="upload-section" id="upload-section">
+      <div class="upload-header">
+        <div class="upload-title">
+          <span id="upload-module-icon">📷</span>
+          <span id="upload-module-title">Subir imagen</span>
+        </div>
+        <button class="upload-close" onclick="cerrarUpload()" aria-label="Cerrar panel">✕</button>
+      </div>
+
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="drop-zone" role="button" aria-label="Zona de carga de imagen">
+        <div class="drop-zone-icon">📸</div>
+        <div class="drop-zone-text">Arrastra tu foto aquí o haz clic para seleccionarla</div>
+        <div class="drop-zone-hint">JPG, PNG, WEBP — máximo 10MB</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" capture="environment" />
+
+      <!-- Image Preview -->
+      <div class="preview-container" id="preview-container">
+        <img id="preview-img" class="preview-img" src="" alt="Vista previa de la imagen" />
+        <div class="preview-overlay">
+          <span class="preview-name" id="preview-name"></span>
+          <button class="btn-remove-img" onclick="removeImage()">✕ Eliminar</button>
+        </div>
+      </div>
+
+      <!-- Geo Info (solo para fugas) -->
+      <div class="geo-info" id="geo-info" style="display: none;">
+        <div class="geo-dot"></div>
+        <span id="geo-text">Detectando tu ubicación…</span>
+      </div>
+
+      <!-- Analyze Button -->
+      <button class="btn-analyze" id="btn-analyze" onclick="analizarImagen()">
+        <div class="spinner" id="btn-analyze-spinner"></div>
+        <span id="btn-analyze-text">✨ Analizar con IA</span>
+      </button>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="results-section" aria-live="polite">
+      <div class="result-header">
+        <span class="severity-badge" id="result-severity">—</span>
+        <span class="result-module-label" id="result-module-label"></span>
+        <div class="result-confidence">
+          <span id="confidence-value">—</span>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="confidence-fill" style="width: 0%"></div>
+          </div>
+          <span style="font-size:0.78rem;color:var(--text-muted)">confianza</span>
+        </div>
+      </div>
+
+      <div class="result-description" id="result-description"></div>
+
+      <div class="result-grid" id="result-grid"></div>
+
+      <div class="result-recomendacion">
+        <span class="recomendacion-icon">💡</span>
+        <span id="result-recomendacion"></span>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-action btn-secondary" onclick="nuevaFoto()">📷 Nueva foto</button>
+        <a href="/dashboard" class="btn-action btn-dashboard">🗺️ Ver mapa de reportes</a>
+        <span class="btn-action" style="margin-left:auto;opacity:0.5;font-size:0.8rem;" id="result-report-id"></span>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ─── Toast Container ─────────────────────────────────────── -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Madero H2O: Guardián del Agua</title>
+  <meta name="description" content="Mapa de calor y estadísticas de reportes hídricos en Ciudad Madero, Tamaulipas." />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+
+  <style>
+    /* Dashboard-specific overrides */
+    .leaflet-container { background: #030d1a !important; }
+    .leaflet-tile { filter: brightness(0.7) saturate(0.6) hue-rotate(180deg); }
+    .leaflet-popup-content-wrapper {
+      background: rgba(6,25,50,0.95) !important;
+      border: 1px solid rgba(0,180,216,0.3) !important;
+      border-radius: 12px !important;
+      color: #e8f4fd !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    }
+    .leaflet-popup-tip { background: rgba(6,25,50,0.95) !important; }
+    .leaflet-popup-close-button { color: #90b8d4 !important; }
+    .popup-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; }
+    .popup-body  { font-size: 0.82rem; color: #90b8d4; line-height: 1.6; }
+    .popup-sev   { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 0.74rem; font-weight: 700; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<!-- Header -->
+<header class="header">
+  <svg class="header-waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path class="header-wave-path" d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="#00b4d8"/>
+  </svg>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">💧</div>
+      <div class="logo-text">
+        <div class="logo-title">Madero H2O</div>
+        <div class="logo-subtitle">Guardián del Agua · Ciudad Madero</div>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="/" class="nav-btn">🏠 Inicio</a>
+      <a href="/dashboard" class="nav-btn active">📊 Dashboard</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- Hero Dashboard -->
+    <section class="hero" style="padding-bottom: 28px;">
+      <div class="hero-badge"><span>📊</span> Panel de Control Hídrico</div>
+      <h1>Mapa de Calor de<br/>Problemas Hídricos</h1>
+      <p class="hero-desc">
+        Visualización en tiempo real de reportes ciudadanos en Ciudad Madero, Tamaulipas. 
+        Fugas, lirio acuático y alertas de calidad del agua.
+      </p>
+    </section>
+
+    <!-- Stats Cards -->
+    <div class="dashboard-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(0,180,216,0.15);border:1px solid rgba(0,180,216,0.3)">📋</div>
+        <div class="stat-card-body">
+          <div class="stat-card-value" id="stat-total">{{ stats.total }}</div>
+          <div class="stat-card-label">Total de reportes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3)">💧</div>
+        <div class="stat-card-body">
+          <div class="stat-card-value" id="stat-fugas" style="color:#ff6b7a">{{ stats.fugas }}</div>
+          <div class="stat-card-label">Fugas reportadas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(82,183,136,0.15);border:1px solid rgba(82,183,136,0.3)">🌿</div>
+        <div class="stat-card-body">
+          <div class="stat-card-value" id="stat-lirio" style="color:#74c69d">{{ stats.lirio }}</div>
+          <div class="stat-card-label">Alertas de lirio</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(0,180,216,0.15);border:1px solid rgba(0,180,216,0.3)">🔬</div>
+        <div class="stat-card-body">
+          <div class="stat-card-value" id="stat-calidad">{{ stats.calidad }}</div>
+          <div class="stat-card-label">Análisis de calidad</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3)">🚨</div>
+        <div class="stat-card-body">
+          <div class="stat-card-value" id="stat-criticas" style="color:#e63946">{{ stats.criticas }}</div>
+          <div class="stat-card-label">Alertas críticas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="map-container">
+      <div class="map-header">
+        <div class="map-title">🗺️ Mapa de Reportes — Ciudad Madero</div>
+        <div class="map-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#ff6b7a"></div> Fugas
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#74c69d"></div> Lirio
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#48cae4"></div> Calidad
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#e63946"></div> Crítico
+          </div>
+        </div>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="reports-table-container">
+      <div class="table-header">📋 Últimos Reportes</div>
+      <div style="overflow-x:auto;">
+        <table id="reports-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Módulo</th>
+              <th>Severidad</th>
+              <th>Descripción</th>
+              <th>Confianza</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Cargando reportes…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ─── Mapa ──────────────────────────────────────────────────────
+const CDMADERO = [22.2744, -97.8326];
+
+const map = L.map("map", {
+  center: CDMADERO,
+  zoom: 13,
+  zoomControl: true,
+});
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19,
+}).addTo(map);
+
+// Color por módulo y severidad
+function getMarkerColor(modulo, severidad) {
+  if (severidad === "critica") return "#e63946";
+  if (modulo === "fuga")    return "#ff6b7a";
+  if (modulo === "lirio")   return "#74c69d";
+  if (modulo === "calidad") return "#48cae4";
+  return "#90b8d4";
+}
+
+function createCircleMarker(lat, lon, color, label) {
+  return L.circleMarker([lat, lon], {
+    radius: 10,
+    fillColor: color,
+    color: "rgba(255,255,255,0.3)",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.85,
+  });
+}
+
+const SEV_CLASSES = {
+  baja:    "severity-baja",
+  media:   "severity-media",
+  alta:    "severity-alta",
+  critica: "severity-critica",
+};
+
+const MOD_EMOJIS = { fuga: "💧", lirio: "🌿", calidad: "🔬" };
+
+// ─── Cargar reportes ───────────────────────────────────────────
+async function cargarReportes() {
+  try {
+    const resp = await fetch("/reportes?limite=100");
+    const data = await resp.json();
+    const reportes = data.reportes || [];
+
+    // Limpiar tabla
+    const tbody = document.getElementById("reports-tbody");
+    tbody.innerHTML = "";
+
+    if (reportes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No hay reportes aún. ¡Sé el primero en reportar!</td></tr>';
+      return;
+    }
+
+    reportes.forEach((r) => {
+      // Marker en mapa
+      if (r.latitud && r.longitud) {
+        const color = getMarkerColor(r.modulo, r.severidad);
+        const marker = createCircleMarker(r.latitud, r.longitud, color);
+
+        const sevClass = SEV_CLASSES[r.severidad] || "";
+        const emoji = MOD_EMOJIS[r.modulo] || "📍";
+
+        marker.bindPopup(`
+          <div class="popup-title">${emoji} ${r.modulo.charAt(0).toUpperCase() + r.modulo.slice(1)} #${r.id}</div>
+          <div class="popup-body">${r.descripcion || "Sin descripción"}</div>
+          <div class="popup-body" style="margin-top:4px">🕒 ${r.timestamp}</div>
+          <div><span class="popup-sev ${sevClass}">${r.severidad || "—"}</span></div>
+        `);
+        marker.addTo(map);
+      }
+
+      // Fila de tabla
+      const tr = document.createElement("tr");
+      const chipClass = `chip-${r.modulo}`;
+      const sevClass  = `severity-${r.severidad}`;
+
+      tr.innerHTML = `
+        <td style="color:var(--text-muted);font-size:0.8rem">${r.id}</td>
+        <td><span class="modulo-chip ${chipClass}">${MOD_EMOJIS[r.modulo] || ""} ${r.modulo}</span></td>
+        <td><span class="severity-badge ${sevClass}" style="font-size:0.74rem;padding:4px 10px">${r.severidad || "—"}</span></td>
+        <td style="max-width:320px;white-space:normal">${r.descripcion || "—"}</td>
+        <td style="color:var(--primary-light)">${r.confianza ? Math.round(r.confianza) + "%" : "—"}</td>
+        <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">${r.timestamp}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("Error cargando reportes:", err);
+    document.getElementById("reports-tbody").innerHTML =
+      '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--sev-critica)">Error al cargar reportes.</td></tr>';
+  }
+}
+
+cargarReportes();
+</script>
+
+</body>
+</html>
