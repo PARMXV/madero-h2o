@@ -8,26 +8,48 @@ import json
 import base64
 import re
 from flask import Flask, render_template, request, jsonify
-from google import genai
-from google.genai import types
 from dotenv import load_dotenv
-from models import init_db, guardar_reporte, obtener_reportes, obtener_estadisticas
-from prompts import get_prompt_fuga, get_prompt_lirio, get_prompt_calidad
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "madero-h2o-2025")
 
-# Inicializar Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=GEMINI_API_KEY)
-MODEL = "gemini-2.5-flash"
+# ─── Lazy initialization — evita crashes al importar en Vercel ───────────────
 
-# Inicializar base de datos
-init_db()
+_gemini_client = None
+_db_initialized = False
 
-# ─── Mapeo de módulos ────────────────────────────────────────────────────────
+
+def get_gemini_client():
+    """Inicializa el cliente de Gemini de forma lazy."""
+    global _gemini_client
+    if _gemini_client is None:
+        from google import genai
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY no configurada en las variables de entorno.")
+        _gemini_client = genai.Client(api_key=api_key)
+    return _gemini_client
+
+
+def ensure_db():
+    """Inicializa la base de datos de forma lazy la primera vez que se necesita."""
+    global _db_initialized
+    if not _db_initialized:
+        from models import init_db
+        try:
+            init_db()
+        except Exception as e:
+            print(f"[WARN] DB init falló (modo sin-persistencia): {e}")
+        _db_initialized = True
+
+
+# ─── Importaciones del proyecto ───────────────────────────────────────────────
+
+from prompts import get_prompt_fuga, get_prompt_lirio, get_prompt_calidad
+
+# ─── Mapeo de módulos ─────────────────────────────────────────────────────────
 
 MODULOS = {
     "fuga": {
@@ -81,7 +103,7 @@ def limpiar_json(texto: str) -> str:
     return texto.strip()
 
 
-# ─── Rutas ───────────────────────────────────────────────────────────────────
+# ─── Rutas ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
@@ -90,21 +112,36 @@ def index():
 
 @app.route("/dashboard")
 def dashboard():
-    stats = obtener_estadisticas()
+    ensure_db()
+    try:
+        from models import obtener_estadisticas
+        stats = obtener_estadisticas()
+    except Exception:
+        stats = {"total": 0, "fugas": 0, "lirio": 0, "calidad": 0, "criticas": 0}
     return render_template("dashboard.html", stats=stats)
 
 
 @app.route("/reportes")
 def reportes():
     """Endpoint JSON para el mapa de calor."""
-    limite = request.args.get("limite", 100, type=int)
-    datos = obtener_reportes(limite=limite)
+    ensure_db()
+    try:
+        from models import obtener_reportes
+        limite = request.args.get("limite", 100, type=int)
+        datos = obtener_reportes(limite=limite)
+    except Exception:
+        datos = []
     return jsonify({"reportes": datos, "total": len(datos)})
 
 
 @app.route("/estadisticas")
 def estadisticas():
-    return jsonify(obtener_estadisticas())
+    ensure_db()
+    try:
+        from models import obtener_estadisticas
+        return jsonify(obtener_estadisticas())
+    except Exception:
+        return jsonify({"total": 0, "fugas": 0, "lirio": 0, "calidad": 0, "criticas": 0})
 
 
 @app.route("/analizar/<modulo>", methods=["POST"])
@@ -114,6 +151,8 @@ def analizar(modulo: str):
         return jsonify({"error": f"Módulo '{modulo}' no reconocido. Usa: fuga, lirio, calidad"}), 400
 
     try:
+        from google.genai import types
+
         data = request.get_json()
         if not data:
             return jsonify({"error": "No se recibieron datos."}), 400
@@ -150,8 +189,9 @@ def analizar(modulo: str):
             types.Part.from_text(text=prompt_texto),
         ]
 
+        client = get_gemini_client()
         response = client.models.generate_content(
-            model=MODEL,
+            model="gemini-2.5-flash",
             contents=contenido,
             config=types.GenerateContentConfig(
                 temperature=0.2,
@@ -175,17 +215,23 @@ def analizar(modulo: str):
         descripcion = resultado.get("descripcion", "Sin descripción disponible.")
         confianza = resultado.get("confianza", 50)
 
-        # Guardar en base de datos
-        datos_extra = json.dumps(resultado)
-        reporte_id = guardar_reporte(
-            modulo=modulo,
-            latitud=lat_final,
-            longitud=lon_final,
-            severidad=severidad,
-            descripcion=descripcion,
-            confianza=float(confianza),
-            datos_extra=datos_extra,
-        )
+        # Guardar en base de datos (falla silenciosamente si DB no disponible)
+        reporte_id = -1
+        ensure_db()
+        try:
+            from models import guardar_reporte
+            datos_extra = json.dumps(resultado)
+            reporte_id = guardar_reporte(
+                modulo=modulo,
+                latitud=lat_final,
+                longitud=lon_final,
+                severidad=severidad,
+                descripcion=descripcion,
+                confianza=float(confianza),
+                datos_extra=datos_extra,
+            )
+        except Exception as db_err:
+            print(f"[WARN] No se pudo guardar en DB: {db_err}")
 
         return jsonify({
             "modulo": modulo,
@@ -196,14 +242,17 @@ def analizar(modulo: str):
             "coordenadas": {"lat": lat_final, "lon": lon_final},
         })
 
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 500
     except Exception as e:
         error_msg = str(e)
         if "API_KEY" in error_msg.upper() or "api key" in error_msg.lower():
-            return jsonify({"error": "API Key inválida o no configurada."}), 500
+            return jsonify({"error": "API Key inválida o no configurada en Vercel."}), 500
         if "quota" in error_msg.lower() or "rate" in error_msg.lower():
             return jsonify({"error": "Límite de solicitudes alcanzado. Intenta en un momento."}), 429
         return jsonify({"error": f"Error interno: {error_msg}"}), 500
 
 
 if __name__ == "__main__":
+    ensure_db()
     app.run(debug=True, port=5002)

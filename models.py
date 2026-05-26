@@ -5,20 +5,29 @@ Usa SQLite local (desarrollo) con fallback a /tmp (Vercel serverless)
 
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Text
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
 
 # Determinar ruta de la base de datos
-# En Vercel, el sistema de archivos es efímero; usamos /tmp
-if os.environ.get("VERCEL"):
-    DB_PATH = "/tmp/madero_h2o.db"
-else:
-    DB_PATH = os.path.join(os.path.dirname(__file__), "madero_h2o.db")
+# En Vercel el filesystem es efímero → /tmp
+# Detectamos Vercel por la variable de entorno VERCEL=1 que Vercel inyecta automáticamente
+def _get_db_path() -> str:
+    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+        return "/tmp/madero_h2o.db"
+    local_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(local_dir, "madero_h2o.db")
 
-engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
-SessionLocal = sessionmaker(bind=engine)
+DB_PATH = _get_db_path()
+
+# Crear engine — connect_args evita errores de threading en serverless
+engine = create_engine(
+    f"sqlite:///{DB_PATH}",
+    echo=False,
+    connect_args={"check_same_thread": False},
+)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
 class Reporte(Base):
