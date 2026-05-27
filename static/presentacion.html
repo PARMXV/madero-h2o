@@ -150,17 +150,37 @@ h2.slide-title{
 .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transition:.3s}
 .dot.active{background:var(--primary);width:18px;border-radius:3px}
 
-/* ═══════ NAV BUTTONS ═══════ */
-.nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100}
-.nav-btn{
-  background:var(--glass);backdrop-filter:blur(12px);
-  border:1px solid var(--border);border-radius:12px;
-  padding:10px 20px;color:var(--text);font-family:'Outfit',sans-serif;
-  font-size:.88rem;font-weight:600;cursor:pointer;transition:.25s ease;
-  display:flex;align-items:center;gap:6px;
+/* ═══════ NAV BUTTONS — flechas laterales fantasma ═══════ */
+.nav-arrow{
+  position:fixed;top:50%;transform:translateY(-50%);
+  width:44px;height:80px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,180,216,.06);
+  border:1px solid rgba(0,180,216,.12);
+  color:rgba(255,255,255,.25);
+  font-size:1.3rem;
+  cursor:pointer;
+  transition:all .3s ease;
+  z-index:100;
+  opacity:0;
+  user-select:none;
+  -webkit-user-select:none;
 }
-.nav-btn:hover{border-color:var(--primary);color:var(--cyan)}
-.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.nav-arrow.left {left:0;border-radius:0 12px 12px 0;border-left:none}
+.nav-arrow.right{right:0;border-radius:12px 0 0 12px;border-right:none}
+.deck:hover ~ .nav-arrow,
+body:hover .nav-arrow{opacity:1}
+.nav-arrow:hover{
+  background:rgba(0,180,216,.18);
+  border-color:rgba(0,180,216,.4);
+  color:var(--cyan);
+  width:52px;
+}
+.nav-arrow:disabled,.nav-arrow[disabled]{
+  opacity:0 !important;
+  cursor:default;
+  pointer-events:none;
+}
 
 /* ═══════ SLIDE-SPECIFIC ACCENTS ═══════ */
 .accent-red   {color:#ff6b7a}
@@ -230,11 +250,9 @@ h2.slide-title{
   <div class="counter-dots" id="dots"></div>
 </div>
 
-<!-- Nav -->
-<div class="nav">
-  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Anterior</button>
-  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
-</div>
+<!-- Nav arrows (laterales) -->
+<button class="nav-arrow left"  id="prevBtn" onclick="changeSlide(-1)" disabled aria-label="Anterior">&#8592;</button>
+<button class="nav-arrow right" id="nextBtn" onclick="changeSlide(1)"          aria-label="Siguiente">&#8594;</button>
 
 <!-- ═══════════════════════════════════════
      SLIDES
