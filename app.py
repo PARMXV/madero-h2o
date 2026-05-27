@@ -127,6 +127,13 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/presentacion")
+def presentacion():
+    """Sirve la presentación de diapositivas."""
+    from flask import send_from_directory
+    return send_from_directory("static", "presentacion.html")
+
+
 @app.route("/dashboard")
 def dashboard():
     ensure_db()
