@@ -222,7 +222,12 @@ body:hover .nav-arrow{opacity:1}
 
 /* ═══════ RESPONSIVE ═══════ */
 @media(max-width:768px){
-  .slide{padding:80px 20px 70px}
+  .slide{
+    padding:80px 20px 70px;
+    justify-content:flex-start;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
   .cards.cols-3,.cards.cols-2{grid-template-columns:1fr}
   .flow{flex-direction:column}
   .flow-arrow{transform:rotate(90deg)}
