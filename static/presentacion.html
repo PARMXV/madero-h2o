@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Madero H2O — Presentación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════ RESET & BASE ═══════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #030d1a;
+  --bg2:      #061525;
+  --primary:  #00b4d8;
+  --cyan:     #48cae4;
+  --accent:   #0077b6;
+  --green:    #52b788;
+  --orange:   #f4a261;
+  --red:      #e63946;
+  --text:     #e8f4fd;
+  --muted:    #6b98b8;
+  --border:   rgba(0,180,216,0.2);
+  --glass:    rgba(6,30,60,0.6);
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
+
+/* ═══════ SLIDESHOW CONTAINER ═══════ */
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+/* ═══════ SLIDE ═══════ */
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 64px;
+  opacity:0;pointer-events:none;
+  transition:opacity .6s ease, transform .6s cubic-bezier(.4,0,.2,1);
+  transform:translateX(60px);
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateX(0)}
+.slide.exit-left{opacity:0;transform:translateX(-60px)}
+
+/* ═══════ ANIMATED BACKGROUND ═══════ */
+.bg-canvas{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 10%,rgba(0,119,182,.2) 0%,transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 90%,rgba(0,180,216,.12) 0%,transparent 60%),
+    var(--bg);
+}
+.wave-bg{
+  position:fixed;bottom:0;left:0;width:200%;height:120px;z-index:0;opacity:.08;
+  animation:wave 10s linear infinite;
+}
+@keyframes wave{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ═══════ SLIDE CONTENT HELPERS ═══════ */
+.slide>*{position:relative;z-index:1}
+.center{text-align:center;width:100%}
+.slide-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 16px;border-radius:100px;border:1px solid var(--border);
+  background:rgba(0,180,216,.07);color:var(--cyan);
+  font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:20px;
+}
+h1.hero-title{
+  font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.05;
+  letter-spacing:-.03em;
+  background:linear-gradient(135deg,#e8f4fd 0%,var(--cyan) 50%,var(--primary) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:16px;
+}
+h2.slide-title{
+  font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:800;line-height:1.1;
+  letter-spacing:-.025em;margin-bottom:12px;
+}
+.subtitle{font-size:1.05rem;color:var(--muted);line-height:1.7;max-width:680px;margin:0 auto}
+
+/* ═══════ CARDS ═══════ */
+.cards{display:grid;gap:18px;width:100%;margin-top:32px}
+.cards.cols-3{grid-template-columns:repeat(3,1fr)}
+.cards.cols-2{grid-template-columns:repeat(2,1fr)}
+.card{
+  background:var(--glass);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:20px;padding:24px;
+  transition:.3s ease;
+}
+.card:hover{border-color:rgba(0,180,216,.5);transform:translateY(-3px)}
+.card-icon{font-size:2rem;margin-bottom:12px}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:8px}
+.card-body{font-size:.85rem;color:var(--muted);line-height:1.65}
+.card-stat{font-size:2.2rem;font-weight:900;color:var(--cyan);line-height:1}
+.card-stat-label{font-size:.78rem;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ═══════ BADGE CHIPS ═══════ */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:.78rem;font-weight:600}
+.chip-red   {background:rgba(230,57,70,.15);color:#ff6b7a;border:1px solid rgba(230,57,70,.3)}
+.chip-green {background:rgba(82,183,136,.15);color:#74c69d;border:1px solid rgba(82,183,136,.3)}
+.chip-blue  {background:rgba(0,180,216,.15);color:var(--cyan);border:1px solid rgba(0,180,216,.3)}
+.chip-orange{background:rgba(244,162,97,.15);color:#f4a261;border:1px solid rgba(244,162,97,.3)}
+
+/* ═══════ FLOW DIAGRAM ═══════ */
+.flow{display:flex;align-items:center;gap:0;width:100%;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.flow-step{
+  background:var(--glass);border:1px solid var(--border);border-radius:16px;
+  padding:16px 20px;text-align:center;min-width:140px;flex:1;max-width:180px;
+}
+.flow-arrow{font-size:1.4rem;color:var(--primary);padding:0 8px;flex-shrink:0}
+.flow-icon{font-size:1.8rem;margin-bottom:8px}
+.flow-label{font-size:.8rem;font-weight:600;color:var(--text)}
+.flow-sub{font-size:.72rem;color:var(--muted);margin-top:4px}
+
+/* ═══════ TABLE ═══════ */
+.data-table{width:100%;border-collapse:collapse;margin-top:24px}
+.data-table th{
+  padding:10px 16px;text-align:left;font-size:.75rem;font-weight:700;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:1px solid var(--border);
+}
+.data-table td{
+  padding:12px 16px;font-size:.88rem;color:var(--muted);
+  border-bottom:1px solid rgba(0,180,216,.05);
+}
+.data-table tr:hover td{background:rgba(0,180,216,.03)}
+.data-table td:first-child{color:var(--text);font-weight:600}
+
+/* ═══════ BIG QUOTE ═══════ */
+.blockquote{
+  border-left:3px solid var(--primary);padding:16px 24px;
+  background:rgba(0,180,216,.05);border-radius:0 12px 12px 0;
+  font-size:1.05rem;color:var(--muted);line-height:1.8;margin-top:20px;
+}
+.blockquote strong{color:var(--text)}
+
+/* ═══════ PROGRESS BAR ═══════ */
+.progress-bar{
+  position:fixed;top:0;left:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--primary),var(--cyan));
+  transition:width .5s ease;z-index:100;
+}
+
+/* ═══════ SLIDE NUMBER ═══════ */
+.slide-counter{
+  position:fixed;bottom:28px;right:36px;
+  font-size:.8rem;color:var(--muted);font-weight:500;z-index:100;
+  display:flex;align-items:center;gap:8px;
+}
+.counter-dots{display:flex;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transition:.3s}
+.dot.active{background:var(--primary);width:18px;border-radius:3px}
+
+/* ═══════ NAV BUTTONS ═══════ */
+.nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100}
+.nav-btn{
+  background:var(--glass);backdrop-filter:blur(12px);
+  border:1px solid var(--border);border-radius:12px;
+  padding:10px 20px;color:var(--text);font-family:'Outfit',sans-serif;
+  font-size:.88rem;font-weight:600;cursor:pointer;transition:.25s ease;
+  display:flex;align-items:center;gap:6px;
+}
+.nav-btn:hover{border-color:var(--primary);color:var(--cyan)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ═══════ SLIDE-SPECIFIC ACCENTS ═══════ */
+.accent-red   {color:#ff6b7a}
+.accent-green {color:#74c69d}
+.accent-cyan  {color:var(--cyan)}
+.accent-orange{color:#f4a261}
+
+/* ═══════ LOGO ═══════ */
+.logo-pill{
+  position:fixed;top:20px;left:28px;
+  display:flex;align-items:center;gap:10px;
+  background:var(--glass);backdrop-filter:blur(12px);
+  border:1px solid var(--border);border-radius:12px;padding:8px 14px;z-index:100;
+}
+.logo-pill span{font-size:.85rem;font-weight:700;color:var(--text)}
+.logo-pill small{font-size:.72rem;color:var(--muted)}
+
+/* ═══════ ANIMATIONS ═══════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 16px rgba(0,180,216,.3)}50%{box-shadow:0 0 36px rgba(0,180,216,.6)}}
+.slide.active .card{animation:fadeUp .5s ease both}
+.slide.active .card:nth-child(2){animation-delay:.1s}
+.slide.active .card:nth-child(3){animation-delay:.2s}
+.slide.active .flow-step{animation:fadeUp .4s ease both}
+.slide.active .flow-step:nth-child(2){animation-delay:.05s}
+.slide.active .flow-step:nth-child(4){animation-delay:.1s}
+.slide.active .flow-step:nth-child(6){animation-delay:.15s}
+.slide.active .flow-step:nth-child(8){animation-delay:.2s}
+
+/* ═══════ DIVIDER LINE ═══════ */
+.divider{width:60px;height:3px;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:2px;margin:16px auto}
+
+/* ═══════ ICON BADGE ═══════ */
+.icon-badge{
+  width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 20px;
+  animation:pulseGlow 3s ease-in-out infinite;
+}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:768px){
+  .slide{padding:32px 24px}
+  .cards.cols-3,.cards.cols-2{grid-template-columns:1fr}
+  .flow{flex-direction:column}
+  .flow-arrow{transform:rotate(90deg)}
+  h1.hero-title{font-size:2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Fixed UI -->
+<div class="bg-canvas"></div>
+<svg class="wave-bg" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 L1440,120 L0,120 Z" fill="#00b4d8"/>
+</svg>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="logo-pill">
+  <span>💧</span>
+  <div><span>Madero H2O</span><br/><small>Guardián del Agua</small></div>
+</div>
+
+<!-- Dots -->
+<div class="slide-counter">
+  <div class="counter-dots" id="dots"></div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SLIDES
+═══════════════════════════════════════ -->
+<div class="deck" id="deck">
+
+  <!-- ── SLIDE 1: PORTADA ────────────────── -->
+  <div class="slide active center" id="s0">
+    <div class="slide-tag">🎓 Programación Web · 10mo Semestre · 2025</div>
+    <h1 class="hero-title">Madero H2O<br/>Guardián del Agua</h1>
+    <div class="divider"></div>
+    <p class="subtitle">
+      Super-App de Cultura Hídrica con Inteligencia Artificial<br/>
+      para <strong style="color:var(--cyan)">Ciudad Madero, Tamaulipas</strong>
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:36px;flex-wrap:wrap">
+      <span class="chip chip-blue">💧 Detección de fugas</span>
+      <span class="chip chip-green">🌿 Lirio acuático</span>
+      <span class="chip chip-orange">🔬 Calidad del agua</span>
+      <span class="chip chip-red">🤖 Gemini Vision IA</span>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: CONTEXTO ───────────────── -->
+  <div class="slide" id="s1">
+    <div class="center" style="margin-bottom:32px">
+      <div class="slide-tag">📍 Contexto</div>
+      <h2 class="slide-title">Ciudad Madero y su Sistema Hídrico</h2>
+    </div>
+    <div class="cards cols-3">
+      <div class="card" style="border-color:rgba(0,180,216,.3)">
+        <div class="card-icon">🗺️</div>
+        <div class="card-title">Ubicación estratégica</div>
+        <div class="card-body">Ciudad Madero es un municipio costero de Tamaulipas, México, abastecido por el <strong style="color:var(--text)">Sistema Lagunario-Chairel</strong> y plantas potabilizadoras de COMAPA Sur.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,.3)">
+        <div class="card-icon">🏞️</div>
+        <div class="card-title">Laguna del Chairel</div>
+        <div class="card-body">Principal fuente de agua superficial de la región. Enfrenta la proliferación de <strong style="color:#74c69d">lirio acuático</strong> (<em>Eichhornia crassipes</em>) que obstruye el flujo y eleva costos de potabilización.</div>
+      </div>
+      <div class="card" style="border-color:rgba(0,119,182,.3)">
+        <div class="card-icon">🏭</div>
+        <div class="card-title">Organismos operadores</div>
+        <div class="card-body">
+          <strong style="color:var(--text)">COMAPA Sur</strong> — Red de distribución de agua potable<br/><br/>
+          <strong style="color:var(--text)">CAEAT</strong> — Comisión del Agua del Estado de Tamaulipas
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: PROBLEMÁTICA ───────────── -->
+  <div class="slide" id="s2">
+    <div class="center" style="margin-bottom:32px">
+      <div class="slide-tag">⚠️ Problemática</div>
+      <h2 class="slide-title">Tres Crisis Hídricas Urgentes</h2>
+    </div>
+    <div class="cards cols-3">
+      <div class="card" style="border-color:rgba(230,57,70,.4);background:rgba(230,57,70,.05)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:2rem">💧</span>
+          <span class="chip chip-red">Crisis 1</span>
+        </div>
+        <div class="card-stat accent-red">40–60%</div>
+        <div class="card-stat-label">del agua potable perdida por fugas no detectadas en Latinoamérica</div>
+        <div class="card-body" style="margin-top:14px">Las fugas en tuberías subterráneas permanecen sin reportarse durante días o semanas por falta de un canal de reporte ciudadano eficiente.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,.4);background:rgba(82,183,136,.05)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:2rem">🌿</span>
+          <span class="chip chip-green">Crisis 2</span>
+        </div>
+        <div class="card-stat accent-green">+30%</div>
+        <div class="card-stat-label">de superficie lagunar cubierta por lirio en temporadas de lluvia</div>
+        <div class="card-body" style="margin-top:14px">El lirio acuático consume el oxígeno del agua, mata ecosistemas y encarece la potabilización en las plantas de tratamiento regionales.</div>
+      </div>
+      <div class="card" style="border-color:rgba(0,180,216,.4);background:rgba(0,180,216,.05)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:2rem">🔬</span>
+          <span class="chip chip-blue">Crisis 3</span>
+        </div>
+        <div class="card-stat accent-cyan">Variable</div>
+        <div class="card-stat-label">calidad del agua por intrusión salina y sedimentos</div>
+        <div class="card-body" style="margin-top:14px">Sin herramientas accesibles, el ciudadano no puede detectar variaciones de turbidez o contaminación temprana en el agua que consume.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: SOLUCIÓN ────────────────── -->
+  <div class="slide" id="s3" style="align-items:flex-start">
+    <div class="center" style="margin-bottom:28px">
+      <div class="slide-tag">💡 Solución</div>
+      <h2 class="slide-title">¿Qué hace Madero H2O?</h2>
+      <p class="subtitle">Una aplicación web que convierte la cámara del ciudadano en un sensor de monitoreo hídrico impulsado por IA.</p>
+    </div>
+    <div class="blockquote">
+      <strong>Concepto central:</strong> El usuario toma una fotografía del problema → la IA lo analiza en segundos → se genera un reporte geolocalizado → las autoridades actúan más rápido.
+    </div>
+    <div style="display:flex;gap:16px;margin-top:24px;flex-wrap:wrap;justify-content:center">
+      <div style="flex:1;min-width:220px;background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <div style="font-size:1.5rem;margin-bottom:10px">📱</div>
+        <div style="font-weight:700;margin-bottom:6px">Para el ciudadano</div>
+        <div style="font-size:.85rem;color:var(--muted)">Interfaz simple: elige el tipo de problema, sube una foto y obtiene un análisis instantáneo.</div>
+      </div>
+      <div style="flex:1;min-width:220px;background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <div style="font-size:1.5rem;margin-bottom:10px">🏛️</div>
+        <div style="font-weight:700;margin-bottom:6px">Para COMAPA Sur</div>
+        <div style="font-size:.85rem;color:var(--muted)">Dashboard con mapa de calor de todos los reportes priorizados por severidad y geolocalización.</div>
+      </div>
+      <div style="flex:1;min-width:220px;background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <div style="font-size:1.5rem;margin-bottom:10px">🌊</div>
+        <div style="font-weight:700;margin-bottom:6px">Para las brigadas</div>
+        <div style="font-size:.85rem;color:var(--muted)">Alertas de zonas con mayor concentración de lirio para optimizar operativos de limpieza.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: MÓDULO 1 ────────────────── -->
+  <div class="slide" id="s4">
+    <div class="center" style="margin-bottom:24px">
+      <div class="slide-tag" style="border-color:rgba(230,57,70,.3);color:#ff6b7a">💧 Módulo 1</div>
+      <h2 class="slide-title">Monitor Ciudadano de Fugas</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-step" style="border-color:rgba(230,57,70,.3)">
+        <div class="flow-icon">📸</div>
+        <div class="flow-label">Foto de la fuga</div>
+        <div class="flow-sub">Mancha, brote o humedad en vía pública</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(0,180,216,.3)">
+        <div class="flow-icon">🤖</div>
+        <div class="flow-label">Gemini Vision</div>
+        <div class="flow-sub">Detecta y clasifica la fuga</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(244,162,97,.3)">
+        <div class="flow-icon">📊</div>
+        <div class="flow-label">Severidad</div>
+        <div class="flow-sub">Baja / Media / Alta / Crítica</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(82,183,136,.3)">
+        <div class="flow-icon">📍</div>
+        <div class="flow-label">Geolocalización</div>
+        <div class="flow-sub">Coordenadas GPS automáticas</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(230,57,70,.3)">
+        <div class="flow-icon">🏛️</div>
+        <div class="flow-label">Reporte COMAPA</div>
+        <div class="flow-sub">Almacenado en mapa de calor</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <span class="chip chip-red">✅ ¿Es fuga real?</span>
+      <span class="chip chip-orange">🔧 Tipo: tubería / válvula / brote</span>
+      <span class="chip chip-blue">⏱️ Urgencia de intervención</span>
+      <span class="chip chip-green">💡 Recomendación inmediata</span>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: MÓDULO 2 ────────────────── -->
+  <div class="slide" id="s5">
+    <div class="center" style="margin-bottom:24px">
+      <div class="slide-tag" style="border-color:rgba(82,183,136,.3);color:#74c69d">🌿 Módulo 2</div>
+      <h2 class="slide-title">Alerta de Lirio Acuático</h2>
+    </div>
+    <div class="cards cols-2" style="gap:20px">
+      <div>
+        <div class="flow" style="flex-direction:column;gap:10px;align-items:stretch">
+          <div class="flow-step" style="border-color:rgba(82,183,136,.3);max-width:100%;text-align:left;display:flex;align-items:center;gap:14px">
+            <div class="flow-icon" style="margin-bottom:0;flex-shrink:0">📷</div>
+            <div>
+              <div class="flow-label">Foto de la laguna o canal</div>
+              <div class="flow-sub">Laguna del Chairel, Carpintero o canales de Ciudad Madero</div>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--primary);font-size:1.2rem">↓</div>
+          <div class="flow-step" style="border-color:rgba(0,180,216,.3);max-width:100%;text-align:left;display:flex;align-items:center;gap:14px">
+            <div class="flow-icon" style="margin-bottom:0;flex-shrink:0">🧠</div>
+            <div>
+              <div class="flow-label">Gemini segmenta la imagen</div>
+              <div class="flow-sub">Identifica lirio vs. agua libre vs. desechos flotantes</div>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--primary);font-size:1.2rem">↓</div>
+          <div class="flow-step" style="border-color:rgba(82,183,136,.3);max-width:100%;text-align:left;display:flex;align-items:center;gap:14px">
+            <div class="flow-icon" style="margin-bottom:0;flex-shrink:0">🚨</div>
+            <div>
+              <div class="flow-label">Alerta a brigadas</div>
+              <div class="flow-sub">Prioriza zonas con mayor cobertura para limpieza inmediata</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Cobertura</th><th>Urgencia</th><th>Acción</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0 – 10%</td><td><span class="chip chip-blue" style="font-size:.72rem">Sin urgencia</span></td><td style="font-size:.82rem">Monitoreo rutinario</td></tr>
+            <tr><td>11 – 30%</td><td><span class="chip chip-green" style="font-size:.72rem">Baja</span></td><td style="font-size:.82rem">Limpieza en 7 días</td></tr>
+            <tr><td>31 – 60%</td><td><span class="chip chip-orange" style="font-size:.72rem">Media</span></td><td style="font-size:.82rem">Esta semana</td></tr>
+            <tr><td>61 – 85%</td><td><span class="chip chip-red" style="font-size:.72rem">Alta</span></td><td style="font-size:.82rem">24 – 48 horas</td></tr>
+            <tr><td>86 – 100%</td><td><span class="chip chip-red" style="font-size:.72rem;background:rgba(230,57,70,.3)">🚨 Crítica</span></td><td style="font-size:.82rem">Intervención inmediata</td></tr>
+          </tbody>
+        </table>
+        <div class="blockquote" style="margin-top:16px;font-size:.82rem">
+          A mayor cobertura de lirio, <strong>menor oxígeno</strong> en el agua, mayor costo de potabilización y mayor impacto en el ecosistema lagunario.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: MÓDULO 3 ────────────────── -->
+  <div class="slide" id="s6">
+    <div class="center" style="margin-bottom:24px">
+      <div class="slide-tag" style="border-color:rgba(0,180,216,.3);color:var(--cyan)">🔬 Módulo 3</div>
+      <h2 class="slide-title">Asistente de Calidad y Turbidez</h2>
+    </div>
+    <div class="cards cols-2">
+      <div class="card" style="border-color:rgba(0,180,216,.3)">
+        <div style="font-weight:700;margin-bottom:14px;font-size:1rem">¿Cómo funciona?</div>
+        <div style="font-size:.88rem;color:var(--muted);line-height:1.8">
+          <div style="margin-bottom:8px">1️⃣ Usuario toma foto de un <strong style="color:var(--text)">vaso de agua</strong> sobre fondo blanco</div>
+          <div style="margin-bottom:8px">2️⃣ Gemini analiza los píxeles: <strong style="color:var(--text)">color, turbidez, partículas visibles</strong></div>
+          <div style="margin-bottom:8px">3️⃣ Compara con la norma <strong style="color:var(--text)">NOM-127-SSA1-2021</strong> de forma orientativa</div>
+          <div>4️⃣ Emite veredicto de <strong style="color:var(--text)">aptitud del agua</strong></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="card" style="border-color:rgba(82,183,136,.3);text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">✅</div>
+            <div style="font-size:.82rem;font-weight:700;color:#74c69d">Apto para consumo</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Transparente, sin olor, turbidez &lt; 1</div>
+          </div>
+          <div class="card" style="border-color:rgba(244,162,97,.3);text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">⚠️</div>
+            <div style="font-size:.82rem;font-weight:700;color:#f4a261">Solo uso doméstico</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Ligeramente turbia, posible sedimento</div>
+          </div>
+          <div class="card" style="border-color:rgba(230,57,70,.3);text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">🚿</div>
+            <div style="font-size:.82rem;font-weight:700;color:#ff6b7a">Solo para riego</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Turbia, color amarillento, sedimentos</div>
+          </div>
+          <div class="card" style="border-color:rgba(230,57,70,.5);background:rgba(230,57,70,.05);text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">🚫</div>
+            <div style="font-size:.82rem;font-weight:700;color:#e63946">No usar</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Marrón, verde o muy opaca. Contactar COMAPA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: AGENTE IA ───────────────── -->
+  <div class="slide" id="s7">
+    <div class="center" style="margin-bottom:28px">
+      <div class="slide-tag">🤖 Inteligencia Artificial</div>
+      <h2 class="slide-title">El Agente: Google Gemini 2.5 Flash</h2>
+    </div>
+    <div class="cards cols-3">
+      <div class="card" style="border-color:rgba(0,180,216,.4)">
+        <div class="card-icon">👁️</div>
+        <div class="card-title">Visión Multimodal</div>
+        <div class="card-body">Gemini puede analizar imágenes y texto simultáneamente. Recibe la foto + el prompt especializado y devuelve un JSON estructurado con el diagnóstico.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,.4)">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Prompts Especializados</div>
+        <div class="card-body">Cada módulo tiene un prompt diseñado por expertos en infraestructura hidráulica, ecología acuática y análisis colorimétrico con contexto local de Tamaulipas.</div>
+      </div>
+      <div class="card" style="border-color:rgba(244,162,97,.4)">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Respuesta en &lt;5s</div>
+        <div class="card-body">Gemini Flash está optimizado para latencia baja. El usuario recibe el análisis completo y la recomendación en menos de 5 segundos desde que sube la foto.</div>
+      </div>
+    </div>
+    <div class="blockquote" style="margin-top:20px">
+      <strong>¿Por qué Gemini en lugar de YOLO?</strong> — Gemini realiza en un solo API call lo que requeriría: detección de objetos (YOLO) + clasificación + análisis de color + generación de texto. Sin instalaciones locales de PyTorch ni GPU.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 9: ARQUITECTURA ────────────── -->
+  <div class="slide" id="s8">
+    <div class="center" style="margin-bottom:24px">
+      <div class="slide-tag">🏗️ Arquitectura</div>
+      <h2 class="slide-title">Stack Técnico</h2>
+    </div>
+    <div class="cards cols-2" style="gap:20px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card" style="border-color:rgba(0,180,216,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">🐍</div>
+          <div>
+            <div style="font-weight:700">Backend: Python + Flask</div>
+            <div style="font-size:.82rem;color:var(--muted)">Agente orquestador con 5 endpoints REST. Enruta cada imagen al prompt correcto.</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(82,183,136,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">🤖</div>
+          <div>
+            <div style="font-weight:700">IA: Gemini 2.5 Flash</div>
+            <div style="font-size:.82rem;color:var(--muted)">Análisis multimodal de imagen + prompt → JSON estructurado de respuesta.</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(244,162,97,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">🗄️</div>
+          <div>
+            <div style="font-weight:700">DB: SQLite + SQLAlchemy</div>
+            <div style="font-size:.82rem;color:var(--muted)">Historial persistente de reportes. En Vercel usa /tmp.</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card" style="border-color:rgba(0,119,182,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">🗺️</div>
+          <div>
+            <div style="font-weight:700">Mapa: Leaflet.js</div>
+            <div style="font-size:.82rem;color:var(--muted)">Mapa de calor open source centrado en Ciudad Madero con markers por módulo y severidad.</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(0,180,216,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">🎨</div>
+          <div>
+            <div style="font-weight:700">Frontend: HTML + CSS + JS</div>
+            <div style="font-size:.82rem;color:var(--muted)">SPA glassmorphism dark mode. Drag-and-drop, geolocalización nativa y animaciones de agua.</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(82,183,136,.3);display:flex;align-items:center;gap:14px">
+          <div style="font-size:1.8rem;flex-shrink:0">☁️</div>
+          <div>
+            <div style="font-weight:700">Deploy: Vercel + GitHub</div>
+            <div style="font-size:.82rem;color:var(--muted)">CI/CD automático. Cada push a main redespliega la app en segundos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10: IMPACTO ────────────────── -->
+  <div class="slide" id="s9">
+    <div class="center" style="margin-bottom:28px">
+      <div class="slide-tag">🌍 Impacto</div>
+      <h2 class="slide-title">¿Qué cambia con Madero H2O?</h2>
+    </div>
+    <div class="cards cols-3">
+      <div class="card" style="text-align:center;border-color:rgba(230,57,70,.3)">
+        <div class="card-stat" style="color:#ff6b7a">⏱️</div>
+        <div style="font-size:1rem;font-weight:700;margin:10px 0">Tiempo de respuesta</div>
+        <div style="font-size:.85rem;color:var(--muted)">De <strong style="color:var(--text)">días sin reporte</strong> a <strong style="color:#ff6b7a">minutos</strong> con geolocalización automática enviada a COMAPA Sur.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:rgba(82,183,136,.3)">
+        <div class="card-stat" style="color:#74c69d">🌿</div>
+        <div style="font-size:1rem;font-weight:700;margin:10px 0">Brigadas más eficientes</div>
+        <div style="font-size:.85rem;color:var(--muted)">Priorización automática de las zonas con mayor cobertura de lirio, reduciendo tiempos muertos en operativos.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:rgba(0,180,216,.3)">
+        <div class="card-stat" style="color:var(--cyan)">💧</div>
+        <div style="font-size:1rem;font-weight:700;margin:10px 0">Ciudadanía activa</div>
+        <div style="font-size:.85rem;color:var(--muted)">Transforma al ciudadano de observador pasivo en <strong style="color:var(--text)">guardián activo</strong> del agua de su comunidad.</div>
+      </div>
+    </div>
+    <div class="blockquote" style="margin-top:20px;text-align:center">
+      <strong>Cada foto que toma un ciudadano puede significar el rescate de millones de litros de agua.</strong>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 11: MEJORAS FUTURAS ──────────── -->
+  <div class="slide" id="s10">
+    <div class="center" style="margin-bottom:24px">
+      <div class="slide-tag">🚀 Roadmap</div>
+      <h2 class="slide-title">Mejoras a Futuro</h2>
+    </div>
+    <div class="cards cols-2" style="gap:16px">
+      <div class="card" style="border-color:rgba(0,180,216,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">🗄️</span>
+          <span style="font-weight:700">Base de Datos en la Nube</span>
+          <span class="chip chip-blue" style="margin-left:auto;font-size:.68rem">v2.0</span>
+        </div>
+        <div class="card-body">Migrar de SQLite a <strong style="color:var(--text)">Vercel Postgres o Supabase</strong> para persistencia real de todos los reportes ciudadanos entre sesiones.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">📱</span>
+          <span style="font-weight:700">App Móvil Nativa</span>
+          <span class="chip chip-green" style="margin-left:auto;font-size:.68rem">v2.0</span>
+        </div>
+        <div class="card-body">Convertir a <strong style="color:var(--text)">Progressive Web App (PWA)</strong> o app React Native para acceso offline, notificaciones push y cámara nativa.</div>
+      </div>
+      <div class="card" style="border-color:rgba(244,162,97,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">📊</span>
+          <span style="font-weight:700">Análisis Predictivo</span>
+          <span class="chip chip-orange" style="margin-left:auto;font-size:.68rem">v3.0</span>
+        </div>
+        <div class="card-body">Usar el historial de reportes para <strong style="color:var(--text)">predecir zonas de alto riesgo</strong> antes de que ocurran fugas o proliferaciones de lirio (ML time-series).</div>
+      </div>
+      <div class="card" style="border-color:rgba(230,57,70,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">🤝</span>
+          <span style="font-weight:700">Integración con COMAPA</span>
+          <span class="chip chip-red" style="margin-left:auto;font-size:.68rem">v3.0</span>
+        </div>
+        <div class="card-body">API directa con los sistemas de COMAPA Sur para que los reportes generen <strong style="color:var(--text)">tickets de mantenimiento automáticamente</strong> sin intermediarios.</div>
+      </div>
+      <div class="card" style="border-color:rgba(0,119,182,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">🛰️</span>
+          <span style="font-weight:700">Imágenes Satelitales</span>
+          <span class="chip chip-blue" style="margin-left:auto;font-size:.68rem">v4.0</span>
+        </div>
+        <div class="card-body">Integrar imágenes de <strong style="color:var(--text)">Google Earth Engine o Sentinel-2</strong> para monitoreo automático de la cobertura de lirio sin depender de fotos ciudadanas.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:1.4rem">🏆</span>
+          <span style="font-weight:700">Gamificación</span>
+          <span class="chip chip-green" style="margin-left:auto;font-size:.68rem">v2.5</span>
+        </div>
+        <div class="card-body">Sistema de <strong style="color:var(--text)">puntos y rankings ciudadanos</strong> para incentivar el reporte constante y crear una cultura de cuidado del agua sostenible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 12: CIERRE ─────────────────── -->
+  <div class="slide center" id="s11">
+    <div class="icon-badge" style="background:linear-gradient(135deg,var(--accent),var(--primary))">💧</div>
+    <div class="slide-tag">🎓 Conclusión</div>
+    <h1 class="hero-title">Cada foto<br/>salva agua</h1>
+    <div class="divider"></div>
+    <p class="subtitle">
+      Madero H2O demuestra que la tecnología puede democratizar el monitoreo ambiental,
+      convirtiendo a cada ciudadano en un sensor inteligente al servicio de su comunidad.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--cyan)">3</div>
+        <div style="font-size:.75rem;color:var(--muted)">Módulos de IA</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:1.5rem;font-weight:800;color:#74c69d">100%</div>
+        <div style="font-size:.75rem;color:var(--muted)">Web, sin instalación</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:1.5rem;font-weight:800;color:#f4a261">&lt;5s</div>
+        <div style="font-size:.75rem;color:var(--muted)">Por análisis</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:1.5rem;font-weight:800;color:#ff6b7a">∞</div>
+        <div style="font-size:.75rem;color:var(--muted)">Ciudadanos conectados</div>
+      </div>
+    </div>
+    <div style="margin-top:36px;font-size:.85rem;color:var(--muted)">
+      github.com/PARMXV/madero-h2o &nbsp;·&nbsp; Ciudad Madero, Tamaulipas 2025
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<script>
+const TITLES = [
+  "Portada","Contexto","Problemática","Solución",
+  "Módulo 1: Fugas","Módulo 2: Lirio","Módulo 3: Calidad",
+  "Agente IA","Arquitectura","Impacto","Mejoras Futuras","Cierre"
+];
+const slides = document.querySelectorAll('.slide');
+const total  = slides.length;
+let current  = 0;
+
+// Build dots
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const d = document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  d.style.cursor='pointer';
+  dotsEl.appendChild(d);
+});
+
+function goTo(n){
+  if(n<0||n>=total) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit-left');
+  setTimeout(()=>slides[current].classList.remove('exit-left'),600);
+
+  current=n;
+  slides[current].classList.add('active');
+
+  // progress
+  document.getElementById('progress').style.width=((current+1)/total*100)+'%';
+
+  // dots
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===current);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').disabled = current===total-1;
+}
+
+function changeSlide(dir){ goTo(current+dir); }
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') changeSlide(1);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   changeSlide(-1);
+  if(e.key==='Home') goTo(0);
+  if(e.key==='End')  goTo(total-1);
+});
+
+// Touch swipe
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) changeSlide(dx<0?1:-1);
+},{passive:true});
+
+// Init progress
+document.getElementById('progress').style.width=(1/total*100)+'%';
+</script>
+</body>
+</html>
