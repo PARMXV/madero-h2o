@@ -26,10 +26,11 @@ def get_gemini_client():
     global _gemini_client
     if _gemini_client is None:
         from google import genai
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
+        # Leer la key de múltiples formas para mayor compatibilidad
+        api_key = os.getenv("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY", "")
+        if not api_key or len(api_key.strip()) < 10:
             raise ValueError("GEMINI_API_KEY no configurada en las variables de entorno.")
-        _gemini_client = genai.Client(api_key=api_key)
+        _gemini_client = genai.Client(api_key=api_key.strip())
     return _gemini_client
 
 
@@ -104,6 +105,22 @@ def limpiar_json(texto: str) -> str:
 
 
 # ─── Rutas ────────────────────────────────────────────────────────────────────
+
+@app.route("/health")
+def health():
+    """Diagnóstico: confirma si GEMINI_API_KEY está visible en Vercel."""
+    api_key = os.getenv("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY", "")
+    key_ok = bool(api_key and len(api_key) > 10)
+    preview = f"{api_key[:8]}...{api_key[-4:]}" if key_ok else "NO ENCONTRADA"
+    return jsonify({
+        "status": "ok" if key_ok else "error - falta GEMINI_API_KEY",
+        "GEMINI_API_KEY_preview": preview,
+        "key_length": len(api_key),
+        "VERCEL": os.environ.get("VERCEL", "local"),
+        "VERCEL_ENV": os.environ.get("VERCEL_ENV", "local"),
+        "env_vars_con_GEMINI": [k for k in os.environ if "GEMINI" in k.upper()],
+    })
+
 
 @app.route("/")
 def index():
